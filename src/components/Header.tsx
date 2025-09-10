@@ -14,14 +14,11 @@ interface HeaderProps {
   onUserChange: (user: User | null) => void;
   tasks: Task[];
   onRestoreTask: (taskId: string) => void;
+  onShowLogin: () => void;
 }
 
-export function Header({ user, onUserChange, tasks, onRestoreTask }: HeaderProps) {
+export function Header({ user, onUserChange, tasks, onRestoreTask, onShowLogin }: HeaderProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
-  const [loginEmail, setLoginEmail] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isCompletedTasksModalOpen, setIsCompletedTasksModalOpen] = useState(false);
 
   // 時計の更新
@@ -44,40 +41,6 @@ export function Header({ user, onUserChange, tasks, onRestoreTask }: HeaderProps
     }
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!loginEmail || !loginPassword) {
-      toast.error('メールアドレスとパスワードを入力してください');
-      return;
-    }
-
-    setIsLoggingIn(true);
-    
-    try {
-      const user = await signIn(loginEmail, loginPassword);
-      onUserChange(user);
-      setIsLoginDialogOpen(false);
-      setLoginEmail('');
-      setLoginPassword('');
-      toast.success('ログインしました');
-    } catch (error: any) {
-      console.error('Login error:', error);
-      if (error.code === 'auth/user-not-found') {
-        toast.error('ユーザーが見つかりません');
-      } else if (error.code === 'auth/wrong-password') {
-        toast.error('パスワードが間違っています');
-      } else if (error.code === 'auth/invalid-email') {
-        toast.error('メールアドレスの形式が正しくありません');
-      } else {
-        toast.error('ログインに失敗しました');
-      }
-    } finally {
-      setIsLoggingIn(false);
-    }
-  };
-
-  const isLoginFormValid = loginEmail.trim() !== '' && loginPassword.trim() !== '';
 
   // 完了したタスクを取得
   const completedTasks = tasks.filter(task => task.isCompleted);
@@ -132,44 +95,9 @@ export function Header({ user, onUserChange, tasks, onRestoreTask }: HeaderProps
               ) : (
                 <div className="flex items-center space-x-2">
                   <span className="text-sm text-gray-400">ゲストモード</span>
-                  <Dialog open={isLoginDialogOpen} onOpenChange={setIsLoginDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" size="sm">
-                        ログイン
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="bg-gray-900 border-gray-800">
-                      <DialogHeader>
-                        <DialogTitle className="text-white">ログイン</DialogTitle>
-                        <DialogDescription className="text-gray-400">
-                          アカウントにログインして全ての機能を利用しましょう
-                        </DialogDescription>
-                      </DialogHeader>
-                      <form onSubmit={handleLogin} className="space-y-4">
-                        <Input
-                          type="email"
-                          placeholder="メールアドレス"
-                          value={loginEmail}
-                          onChange={(e) => setLoginEmail(e.target.value)}
-                          className="bg-gray-800 border-gray-700 text-white"
-                        />
-                        <Input
-                          type="password"
-                          placeholder="パスワード"
-                          value={loginPassword}
-                          onChange={(e) => setLoginPassword(e.target.value)}
-                          className="bg-gray-800 border-gray-700 text-white"
-                        />
-                        <Button
-                          type="submit"
-                          className="w-full"
-                          disabled={!isLoginFormValid || isLoggingIn}
-                        >
-                          {isLoggingIn ? 'ログイン中...' : 'ログイン'}
-                        </Button>
-                      </form>
-                    </DialogContent>
-                  </Dialog>
+                  <Button variant="outline" size="sm" onClick={onShowLogin}>
+                    ログイン
+                  </Button>
                 </div>
               )}
             </div>
@@ -177,7 +105,7 @@ export function Header({ user, onUserChange, tasks, onRestoreTask }: HeaderProps
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setIsLoginDialogOpen(true)}
+              onClick={onShowLogin}
             >
               ログイン
             </Button>

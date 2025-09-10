@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Toaster } from 'sonner';
 import { LoginScreen } from '@/components/LoginScreen';
 import { Header } from '@/components/Header';
@@ -9,9 +9,6 @@ import { TimerModal } from '@/components/TimerModal';
 import { MemoSection } from '@/components/MemoSection';
 import { User, Task, TaskStats, Memo } from '@/types';
 import { 
-  signIn,
-  signUp,
-  signOutUser,
   onAuthStateChange,
   loadTasks,
   saveTask,
@@ -31,6 +28,7 @@ function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [memo, setMemo] = useState<Memo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showLoginScreen, setShowLoginScreen] = useState(false);
   const [timerModal, setTimerModal] = useState<{
     isOpen: boolean;
     task: Task | null;
@@ -221,10 +219,13 @@ function App() {
   }
 
   // ログイン画面
-  if (!user) {
+  if (showLoginScreen) {
     return (
       <>
-        <LoginScreen onLogin={setUser} />
+        <LoginScreen onLogin={(user) => {
+          setUser(user);
+          setShowLoginScreen(false);
+        }} />
         <Toaster theme="dark" position="top-right" />
       </>
     );
@@ -234,7 +235,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-black">
-      <Header user={user} onUserChange={setUser} tasks={tasks} onRestoreTask={handleRestoreTask} />
+      <Header user={user} onUserChange={setUser} tasks={tasks} onRestoreTask={handleRestoreTask} onShowLogin={() => setShowLoginScreen(true)} />
       
       <main className="max-w-4xl mx-auto px-4 pt-24 pb-8">
         {/* 統計カード */}

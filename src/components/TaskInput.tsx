@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus } from 'lucide-react';
 import { Task } from '@/types';
-import { generateId } from '@/lib/utils';
 
 interface TaskInputProps {
   onAddTask: (task: Omit<Task, 'id' | 'createdAt' | 'isActive' | 'isCompleted' | 'isPriority'>) => void;

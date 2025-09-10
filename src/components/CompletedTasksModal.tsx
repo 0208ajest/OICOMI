@@ -1,10 +1,9 @@
-import React from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Task } from '@/types';
-import { formatDate, formatTime } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
 import { CheckCircle, Clock, Calendar, ExternalLink, RotateCcw } from 'lucide-react';
 
 interface CompletedTasksModalProps {
@@ -28,16 +27,6 @@ export function CompletedTasksModal({ isOpen, onClose, completedTasks, onRestore
     return 'たった今';
   };
 
-  const formatDuration = (startTime: Date, endTime: Date) => {
-    const diff = endTime.getTime() - startTime.getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(minutes / 60);
-    
-    if (hours > 0) {
-      return `${hours}時間${minutes % 60}分`;
-    }
-    return `${minutes}分`;
-  };
 
   // 完了日時でソート（新しい順）
   const sortedTasks = [...completedTasks].sort((a, b) => {

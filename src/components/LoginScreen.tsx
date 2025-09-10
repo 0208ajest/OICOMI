@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { User } from '@/types';
-import { signIn, signUp } from '@/lib/firebase-storage';
+import { signIn } from '@/lib/firebase-storage';
 
 interface LoginScreenProps {
   onLogin: (user: User) => void;

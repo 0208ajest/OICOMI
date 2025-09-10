@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Memo } from '@/types';
-import { saveMemo, loadMemo } from '@/lib/storage';
+import { saveMemo } from '@/lib/storage';
 import { FileText } from 'lucide-react';
 
 interface MemoSectionProps {

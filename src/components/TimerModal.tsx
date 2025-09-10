@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Task, TimerState } from '@/types';
 import { formatTime } from '@/lib/utils';
-import { Play, Pause, Square, Check, X } from 'lucide-react';
+import { Play, Pause, Square, Check } from 'lucide-react';
 
 interface TimerModalProps {
   isOpen: boolean;

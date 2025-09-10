@@ -10,18 +10,15 @@ import {
   setDoc, 
   getDoc, 
   collection, 
-  addDoc, 
   updateDoc, 
   deleteDoc, 
   query, 
-  where, 
   getDocs,
   orderBy,
   Timestamp 
 } from 'firebase/firestore';
 import { auth, db } from './firebase';
 import { User, Task, Memo } from '@/types';
-import { generateId } from './utils';
 
 // 認証関連
 export async function signIn(email: string, password: string): Promise<User> {
