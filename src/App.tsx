@@ -28,7 +28,7 @@ function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [memo, setMemo] = useState<Memo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showLoginScreen, setShowLoginScreen] = useState(false);
+  const [showLoginScreen, setShowLoginScreen] = useState(true);
   const [timerModal, setTimerModal] = useState<{
     isOpen: boolean;
     task: Task | null;

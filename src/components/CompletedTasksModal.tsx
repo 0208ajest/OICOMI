@@ -1,10 +1,12 @@
+import { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Task } from '@/types';
 import { formatDate } from '@/lib/utils';
-import { CheckCircle, Clock, Calendar, ExternalLink, RotateCcw } from 'lucide-react';
+import { CheckCircle, Clock, Calendar, ExternalLink, RotateCcw, BarChart3, List } from 'lucide-react';
+import { TaskProgressChart } from './TaskProgressChart';
 
 interface CompletedTasksModalProps {
   isOpen: boolean;
@@ -14,6 +16,8 @@ interface CompletedTasksModalProps {
 }
 
 export function CompletedTasksModal({ isOpen, onClose, completedTasks, onRestoreTask }: CompletedTasksModalProps) {
+  const [viewMode, setViewMode] = useState<'list' | 'chart'>('list');
+
   const formatCompletedTime = (date: Date) => {
     const now = new Date();
     const diff = now.getTime() - date.getTime();
@@ -36,19 +40,55 @@ export function CompletedTasksModal({ isOpen, onClose, completedTasks, onRestore
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-gray-900 border-gray-800 max-w-2xl max-h-[80vh]">
+      <DialogContent className="bg-gray-900 border-gray-800 max-w-4xl max-h-[90vh]">
         <DialogHeader>
-          <DialogTitle className="text-white flex items-center space-x-2">
-            <CheckCircle className="w-5 h-5 text-green-500" />
-            <span>完了したタスク</span>
-            <span className="text-sm text-gray-400">({completedTasks.length}件)</span>
-          </DialogTitle>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <CheckCircle className="w-5 h-5 text-green-500" />
+              <DialogTitle className="text-white">
+                完了したタスク
+                <span className="text-sm text-gray-400 ml-2">({completedTasks.length}件)</span>
+              </DialogTitle>
+            </div>
+            <div className="flex space-x-1">
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className={`h-8 px-3 ${
+                  viewMode === 'list'
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700'
+                }`}
+              >
+                <List className="w-4 h-4 mr-1" />
+                一覧
+              </Button>
+              <Button
+                variant={viewMode === 'chart' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('chart')}
+                className={`h-8 px-3 ${
+                  viewMode === 'chart'
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700'
+                }`}
+              >
+                <BarChart3 className="w-4 h-4 mr-1" />
+                グラフ
+              </Button>
+            </div>
+          </div>
           <DialogDescription className="text-gray-400">
-            これまでに完了したタスクの一覧です
+            {viewMode === 'list' 
+              ? 'これまでに完了したタスクの一覧です'
+              : '完了タスクの推移をグラフで確認できます'
+            }
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="h-96">
+        {viewMode === 'list' ? (
+          <ScrollArea className="h-96">
           <div className="space-y-3">
             {sortedTasks.length === 0 ? (
               <div className="text-center text-gray-500 py-8">
@@ -135,6 +175,11 @@ export function CompletedTasksModal({ isOpen, onClose, completedTasks, onRestore
             )}
           </div>
         </ScrollArea>
+        ) : (
+          <div className="space-y-4">
+            <TaskProgressChart completedTasks={completedTasks} />
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
