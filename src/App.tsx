@@ -57,7 +57,12 @@ function App() {
             }
           } else {
             // 未ログインの場合（ゲストモード）
-            setUser(null);
+            const guestUser: User = {
+              id: 'guest',
+              email: '',
+              isLoggedIn: false,
+            };
+            setUser(guestUser);
             const localTasks = loadTasksLocal();
             const localMemo = loadMemoLocal();
             setTasks(localTasks);
@@ -239,7 +244,7 @@ function App() {
       
       <main className="max-w-4xl mx-auto px-4 pt-24 pb-8">
         {/* 統計カード */}
-        <StatsCards stats={stats} isLoggedIn={user.isLoggedIn} />
+        <StatsCards stats={stats} isLoggedIn={user?.isLoggedIn || false} />
         
         {/* タスク入力 */}
         <TaskInput onAddTask={handleAddTask} />

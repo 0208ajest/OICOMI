@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 import { User, Task } from '@/types';
 import { formatDate, formatTimeOnly } from '@/lib/utils';
-import { signIn, signOutUser } from '@/lib/firebase-storage';
+import { signOutUser } from '@/lib/firebase-storage';
 import { toast } from 'sonner';
 import { LogOut, User as UserIcon } from 'lucide-react';
 import { CompletedTasksModal } from './CompletedTasksModal';
