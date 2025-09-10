@@ -41,7 +41,47 @@ npm run dev
 
 4. ブラウザで `http://localhost:5174` にアクセス
 
-### Vercel + Firebase デプロイ
+### GitHub Pages + Firebase デプロイ
+
+1. **Firebase設定**:
+   - Firebase Consoleでプロジェクトを作成
+   - Authentication を有効化（Email/Password認証）
+   - Firestore Database を作成
+   - セキュリティルールを設定:
+   ```javascript
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{database}/documents {
+       match /users/{userId}/tasks/{taskId} {
+         allow read, write: if request.auth != null && request.auth.uid == userId;
+       }
+       match /users/{userId}/memo {
+         allow read, write: if request.auth != null && request.auth.uid == userId;
+       }
+     }
+   }
+   ```
+
+2. **GitHub Pages設定**:
+   - GitHubリポジトリの Settings > Pages に移動
+   - Source を "GitHub Actions" に設定
+   - 環境変数を設定（Repository secrets）:
+     - `VITE_FIREBASE_API_KEY`
+     - `VITE_FIREBASE_AUTH_DOMAIN`
+     - `VITE_FIREBASE_PROJECT_ID`
+     - `VITE_FIREBASE_STORAGE_BUCKET`
+     - `VITE_FIREBASE_MESSAGING_SENDER_ID`
+     - `VITE_FIREBASE_APP_ID`
+
+3. **デプロイ**:
+   ```bash
+   npm run deploy
+   ```
+   または、mainブランチにプッシュすると自動デプロイされます。
+
+4. **アクセス**: `https://0208ajest.github.io/OICOMI`
+
+### Vercel + Firebase デプロイ（代替案）
 
 1. **Firebase設定**:
    - Firebase Consoleでプロジェクトを作成
