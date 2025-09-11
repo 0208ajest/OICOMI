@@ -3,6 +3,8 @@ import {
   createUserWithEmailAndPassword, 
   signOut, 
   onAuthStateChanged,
+  signInWithPopup,
+  GoogleAuthProvider,
   User as FirebaseUser
 } from 'firebase/auth';
 import { 
@@ -53,6 +55,25 @@ export async function signUp(email: string, password: string): Promise<User> {
     return user;
   } catch (error) {
     console.error('Sign up error:', error);
+    throw error;
+  }
+}
+
+export async function signInWithGoogle(): Promise<User> {
+  try {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    const firebaseUser = result.user;
+    
+    const user: User = {
+      id: firebaseUser.uid,
+      email: firebaseUser.email || '',
+      isLoggedIn: true,
+    };
+    
+    return user;
+  } catch (error) {
+    console.error('Google sign in error:', error);
     throw error;
   }
 }
