@@ -105,12 +105,14 @@ export function onAuthStateChange(callback: (user: User | null) => void): () => 
 // タスク関連
 export async function saveTask(userId: string, task: Task): Promise<void> {
   try {
+    console.log('Saving task to Firestore:', { userId, taskId: task.id, taskTitle: task.title });
     const taskRef = doc(db, 'users', userId, 'tasks', task.id);
     await setDoc(taskRef, {
       ...task,
       createdAt: Timestamp.fromDate(task.createdAt),
       completedAt: task.completedAt ? Timestamp.fromDate(task.completedAt) : null,
     });
+    console.log('Task saved successfully to Firestore');
   } catch (error) {
     console.error('Save task error:', error);
     throw error;
@@ -119,11 +121,12 @@ export async function saveTask(userId: string, task: Task): Promise<void> {
 
 export async function loadTasks(userId: string): Promise<Task[]> {
   try {
+    console.log('Loading tasks from Firestore for user:', userId);
     const tasksRef = collection(db, 'users', userId, 'tasks');
     const q = query(tasksRef, orderBy('createdAt', 'asc'));
     const querySnapshot = await getDocs(q);
     
-    return querySnapshot.docs.map(doc => {
+    const tasks = querySnapshot.docs.map(doc => {
       const data = doc.data();
       return {
         ...data,
@@ -132,6 +135,9 @@ export async function loadTasks(userId: string): Promise<Task[]> {
         completedAt: data.completedAt ? data.completedAt.toDate() : undefined,
       } as Task;
     });
+    
+    console.log('Loaded tasks from Firestore:', tasks.length);
+    return tasks;
   } catch (error) {
     console.error('Load tasks error:', error);
     return [];
@@ -170,11 +176,13 @@ export async function deleteTask(userId: string, taskId: string): Promise<void> 
 // メモ関連
 export async function saveMemo(userId: string, memo: Memo): Promise<void> {
   try {
+    console.log('Saving memo to Firestore for user:', userId);
     const memoRef = doc(db, 'users', userId, 'memo', 'current');
     await setDoc(memoRef, {
       ...memo,
       lastUpdated: Timestamp.fromDate(memo.lastUpdated),
     });
+    console.log('Memo saved successfully to Firestore');
   } catch (error) {
     console.error('Save memo error:', error);
     throw error;
@@ -183,17 +191,20 @@ export async function saveMemo(userId: string, memo: Memo): Promise<void> {
 
 export async function loadMemo(userId: string): Promise<Memo | null> {
   try {
+    console.log('Loading memo from Firestore for user:', userId);
     const memoRef = doc(db, 'users', userId, 'memo', 'current');
     const memoSnap = await getDoc(memoRef);
     
     if (memoSnap.exists()) {
       const data = memoSnap.data();
+      console.log('Memo found in Firestore');
       return {
         ...data,
         lastUpdated: data.lastUpdated.toDate(),
       } as Memo;
     }
     
+    console.log('No memo found in Firestore');
     return null;
   } catch (error) {
     console.error('Load memo error:', error);

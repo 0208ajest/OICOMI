@@ -43,30 +43,54 @@ function App() {
       try {
         // Firebase認証状態の監視
         const unsubscribe = onAuthStateChange(async (firebaseUser) => {
+          console.log('Auth state changed:', firebaseUser ? 'Logged in' : 'Not logged in');
+          
           if (firebaseUser) {
             // ログイン済みの場合
+            console.log('Loading data for user:', firebaseUser.id);
             setUser(firebaseUser);
+            
             try {
-              const userTasks = await loadTasks(firebaseUser.id);
-              const userMemo = await loadMemo(firebaseUser.id);
+              // 並行してデータを読み込み
+              const [userTasks, userMemo] = await Promise.all([
+                loadTasks(firebaseUser.id),
+                loadMemo(firebaseUser.id)
+              ]);
+              
+              console.log('Loaded tasks:', userTasks.length);
+              console.log('Loaded memo:', userMemo ? 'Yes' : 'No');
+              
               setTasks(userTasks);
               setMemo(userMemo);
+              toast.success('データを読み込みました');
             } catch (error) {
               console.error('Failed to load user data:', error);
               toast.error('データの読み込みに失敗しました');
+              // エラー時は空のデータを設定
+              setTasks([]);
+              setMemo(null);
             }
           } else {
             // 未ログインの場合（ゲストモード）
+            console.log('Switching to guest mode');
             const guestUser: User = {
               id: 'guest',
               email: '',
               isLoggedIn: false,
             };
             setUser(guestUser);
-            const localTasks = loadTasksLocal();
-            const localMemo = loadMemoLocal();
-            setTasks(localTasks);
-            setMemo(localMemo);
+            
+            try {
+              const localTasks = loadTasksLocal();
+              const localMemo = loadMemoLocal();
+              setTasks(localTasks);
+              setMemo(localMemo);
+              console.log('Loaded local tasks:', localTasks.length);
+            } catch (error) {
+              console.error('Failed to load local data:', error);
+              setTasks([]);
+              setMemo(null);
+            }
           }
           setIsLoading(false);
         });
@@ -227,9 +251,32 @@ function App() {
   if (showLoginScreen) {
     return (
       <>
-        <LoginScreen onLogin={(user) => {
+        <LoginScreen onLogin={async (user) => {
+          console.log('Login successful:', user);
           setUser(user);
           setShowLoginScreen(false);
+          
+          // ログイン後にデータを読み込み
+          if (user.isLoggedIn && user.id !== 'guest') {
+            try {
+              setIsLoading(true);
+              const [userTasks, userMemo] = await Promise.all([
+                loadTasks(user.id),
+                loadMemo(user.id)
+              ]);
+              
+              setTasks(userTasks);
+              setMemo(userMemo);
+              toast.success('データを読み込みました');
+            } catch (error) {
+              console.error('Failed to load data after login:', error);
+              toast.error('データの読み込みに失敗しました');
+              setTasks([]);
+              setMemo(null);
+            } finally {
+              setIsLoading(false);
+            }
+          }
         }} />
         <Toaster theme="dark" position="top-right" />
       </>
