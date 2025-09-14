@@ -58,10 +58,10 @@ export function setUserProperties(userId: string, userProperties?: Record<string
 
 /**
  * ログインイベントを追跡
- * @param method ログイン方法 ('email', 'google', 'guest')
+ * @param method ログイン方法 ('email', 'email_register', 'email_login', 'google', 'guest', 'firebase')
  * @param userId ユーザーID
  */
-export function trackLogin(method: 'email' | 'google' | 'guest', userId?: string): void {
+export function trackLogin(method: 'email' | 'email_register' | 'email_login' | 'google' | 'guest' | 'firebase', userId?: string): void {
   trackEvent('login', {
     method: method,
     user_id: userId || 'guest',

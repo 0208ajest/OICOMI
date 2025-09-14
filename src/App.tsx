@@ -26,11 +26,9 @@ import {
   trackPageView, 
   setUserProperties, 
   trackLogin, 
-  trackLogout,
   trackTaskCreated,
   trackTaskCompleted,
   trackTimerStarted,
-  trackTaskPriority,
   trackMemoUpdated,
   trackTaskRestored,
   trackError
