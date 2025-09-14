@@ -4,6 +4,7 @@ import { User, Task } from '@/types';
 import { formatDate, formatTimeOnly } from '@/lib/utils';
 import { signOutUser } from '@/lib/firebase-storage';
 import { toast } from 'sonner';
+import { trackLogout, trackCompletedTasksViewed } from '@/lib/analytics';
 import { LogOut, User as UserIcon } from 'lucide-react';
 import { CompletedTasksModal } from './CompletedTasksModal';
 
@@ -31,6 +32,10 @@ export function Header({ user, onUserChange, tasks, onRestoreTask, onShowLogin }
   const handleLogout = async () => {
     try {
       await signOutUser();
+      
+      // ログアウトイベントを追跡
+      trackLogout(user?.id);
+      
       onUserChange(null);
       toast.info('ログアウトしました');
     } catch (error) {
@@ -45,6 +50,9 @@ export function Header({ user, onUserChange, tasks, onRestoreTask, onShowLogin }
 
   const handleLogoClick = () => {
     setIsCompletedTasksModalOpen(true);
+    
+    // 完了タスク一覧表示イベントを追跡
+    trackCompletedTasksViewed(completedTasks.length, user?.id);
   };
 
   return (

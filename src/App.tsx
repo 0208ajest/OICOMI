@@ -22,6 +22,19 @@ import {
 } from '@/lib/firebase-storage';
 import { generateId, isToday, isThisWeek } from '@/lib/utils';
 import { toast } from 'sonner';
+import { 
+  trackPageView, 
+  setUserProperties, 
+  trackLogin, 
+  trackLogout,
+  trackTaskCreated,
+  trackTaskCompleted,
+  trackTimerStarted,
+  trackTaskPriority,
+  trackMemoUpdated,
+  trackTaskRestored,
+  trackError
+} from '@/lib/analytics';
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -39,6 +52,9 @@ function App() {
 
   // 初期データの読み込み
   useEffect(() => {
+    // ページビューを追跡
+    trackPageView('OICOMI - Work Support App', '/');
+    
     const initializeApp = async () => {
       try {
         // Firebase認証状態の監視
@@ -49,6 +65,12 @@ function App() {
             // ログイン済みの場合
             console.log('Loading data for user:', firebaseUser.id);
             setUser(firebaseUser);
+            
+            // ユーザープロパティを設定
+            setUserProperties(firebaseUser.id, {
+              login_method: 'firebase',
+              is_guest: false
+            });
             
             try {
               // 並行してデータを読み込み
@@ -79,6 +101,12 @@ function App() {
               isLoggedIn: false,
             };
             setUser(guestUser);
+            
+            // ゲストユーザーのプロパティを設定
+            setUserProperties('guest', {
+              login_method: 'guest',
+              is_guest: true
+            });
             
             try {
               const localTasks = loadTasksLocal();
@@ -145,10 +173,17 @@ function App() {
       
       const updatedTasks = [...tasks, newTask];
       setTasks(updatedTasks);
+      
+      // タスク作成イベントを追跡
+      trackTaskCreated(newTask.id, newTask.estimatedTime, user?.id);
+      
       toast.success('タスクを追加しました');
     } catch (error) {
       console.error('Failed to add task:', error);
       toast.error('タスクの追加に失敗しました');
+      
+      // エラーイベントを追跡
+      trackError('task_creation_failed', error instanceof Error ? error.message : 'Unknown error', user?.id);
     }
   };
 
@@ -192,16 +227,26 @@ function App() {
     
     setTasks(updatedTasks);
     
+    // タイマー開始イベントを追跡
+    trackTimerStarted(task.id, task.estimatedTime, user?.id);
+    
     // ポップアップは表示しない（タスク上のUIのみでタイマー表示）
   };
 
   // タスクの完了
   const handleCompleteTask = (taskId: string) => {
+    const task = tasks.find(t => t.id === taskId);
     handleUpdateTask(taskId, {
       isCompleted: true,
       completedAt: new Date(),
       isActive: false,
     });
+    
+    // タスク完了イベントを追跡
+    if (task) {
+      trackTaskCompleted(taskId, task.estimatedTime, user?.id);
+    }
+    
     toast.success('タスクを完了しました');
   };
 
@@ -212,6 +257,10 @@ function App() {
       completedAt: undefined,
       isActive: false,
     });
+    
+    // タスク復元イベントを追跡
+    trackTaskRestored(taskId, user?.id);
+    
     toast.success('タスクを復活させました');
   };
 
@@ -232,9 +281,15 @@ function App() {
       }
       
       setMemo(updatedMemo);
+      
+      // メモ更新イベントを追跡
+      trackMemoUpdated(updatedMemo.content.length, user?.id);
     } catch (error) {
       console.error('Failed to save memo:', error);
       toast.error('メモの保存に失敗しました');
+      
+      // エラーイベントを追跡
+      trackError('memo_save_failed', error instanceof Error ? error.message : 'Unknown error', user?.id);
     }
   };
 
@@ -255,6 +310,9 @@ function App() {
           console.log('Login successful:', user);
           setUser(user);
           setShowLoginScreen(false);
+          
+          // ログインイベントを追跡
+          trackLogin(user.isLoggedIn ? 'firebase' : 'guest', user.id);
           
           // ログイン後にデータを読み込み
           if (user.isLoggedIn && user.id !== 'guest') {

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Task } from '@/types';
 import { formatDate } from '@/lib/utils';
 import { CheckCircle, Clock, Calendar, ExternalLink, RotateCcw, BarChart3, List } from 'lucide-react';
+import { trackViewModeChanged } from '@/lib/analytics';
 import { TaskProgressChart } from './TaskProgressChart';
 
 interface CompletedTasksModalProps {
@@ -54,7 +55,10 @@ export function CompletedTasksModal({ isOpen, onClose, completedTasks, onRestore
               <Button
                 variant={viewMode === 'list' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setViewMode('list')}
+                onClick={() => {
+                  setViewMode('list');
+                  trackViewModeChanged('list');
+                }}
                 className={`h-8 px-3 ${
                   viewMode === 'list'
                     ? 'bg-blue-600 hover:bg-blue-700 text-white'
@@ -67,7 +71,10 @@ export function CompletedTasksModal({ isOpen, onClose, completedTasks, onRestore
               <Button
                 variant={viewMode === 'chart' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setViewMode('chart')}
+                onClick={() => {
+                  setViewMode('chart');
+                  trackViewModeChanged('chart');
+                }}
                 className={`h-8 px-3 ${
                   viewMode === 'chart'
                     ? 'bg-blue-600 hover:bg-blue-700 text-white'

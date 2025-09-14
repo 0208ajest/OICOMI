@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { toast } from 'sonner';
 import { User } from '@/types';
 import { signIn, signUp, signInWithGoogle } from '@/lib/firebase-storage';
+import { trackLogin, trackError } from '@/lib/analytics';
 
 interface LoginScreenProps {
   onLogin: (user: User) => void;
@@ -32,6 +33,10 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
         : await signIn(email, password);
       
       onLogin(user);
+      
+      // ログインイベントを追跡
+      trackLogin(isRegisterMode ? 'email_register' : 'email_login', user.id);
+      
       toast.success(isRegisterMode ? 'アカウントを作成しました' : 'ログインしました');
     } catch (error: any) {
       console.error('Auth error:', error);
@@ -57,6 +62,9 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
           toast.error('ログインに失敗しました');
         }
       }
+      
+      // エラーイベントを追跡
+      trackError('auth_failed', error.message || 'Authentication failed');
     } finally {
       setIsLoading(false);
     }
@@ -68,6 +76,10 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
     try {
       const user = await signInWithGoogle();
       onLogin(user);
+      
+      // Google認証イベントを追跡
+      trackLogin('google', user.id);
+      
       toast.success('Googleアカウントでログインしました');
     } catch (error: any) {
       console.error('Google auth error:', error);
@@ -76,6 +88,9 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
       } else {
         toast.error('Googleログインに失敗しました');
       }
+      
+      // エラーイベントを追跡
+      trackError('google_auth_failed', error.message || 'Google authentication failed');
     } finally {
       setIsLoading(false);
     }
@@ -89,6 +104,10 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
     };
     
     onLogin(guestUser);
+    
+    // ゲストログインイベントを追跡
+    trackLogin('guest', guestUser.id);
+    
     toast.info('ゲストモードでログインしました');
   };
 

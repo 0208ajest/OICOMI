@@ -5,6 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent } from '@/components/ui/card';
 import { Task } from '@/types';
 import { formatTime, truncateText } from '@/lib/utils';
+import { trackTaskPriority, trackUrlAdded } from '@/lib/analytics';
 import { 
   Play, 
   Check, 
@@ -63,6 +64,10 @@ export function TaskTimeline({ tasks, onUpdateTask, onStartTimer }: TaskTimeline
       onUpdateTask(taskId, {
         urls: [...task.urls, newUrl.trim()]
       });
+      
+      // URL追加イベントを追跡
+      trackUrlAdded(taskId, task.urls.length + 1);
+      
       setNewUrl('');
     }
   };
@@ -85,7 +90,11 @@ export function TaskTimeline({ tasks, onUpdateTask, onStartTimer }: TaskTimeline
   const handleSetPriority = (taskId: string) => {
     const task = tasks.find(t => t.id === taskId);
     if (task) {
-      onUpdateTask(taskId, { isPriority: !task.isPriority });
+      const newPriority = !task.isPriority;
+      onUpdateTask(taskId, { isPriority: newPriority });
+      
+      // 優先度設定イベントを追跡
+      trackTaskPriority(taskId, newPriority);
     }
   };
 
